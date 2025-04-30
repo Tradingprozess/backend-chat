@@ -1,0 +1,466 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Visibility {
+  Public
+  Private
+}
+
+enum VisibilityType {
+  public
+  private
+}
+
+enum Language {
+  en
+  ar
+  fr
+  de
+}
+
+enum Theme {
+  light
+  dark
+}
+
+enum Instrument {
+  All
+  Forex
+  Stocks
+  Crypto
+  Futures
+}
+
+enum Mode {
+  per_Contract
+  per_Share
+  per_Execution
+}
+
+enum Apply {
+  on_entry_executions
+  on_exit_executions
+  on_all_executions
+}
+
+enum Period {
+  month
+  year
+}
+
+enum FileType {
+  image
+  video
+  audio
+  other
+  none
+}
+
+enum NoteType {
+  NotebookNote
+  JournalDetails
+  TradeNote
+}
+
+model User {
+  id                    String                  @id @default(auto()) @map("_id") @db.ObjectId
+  username              String?                 @unique
+  email                 String                  @unique
+  password              String
+  firstName             String?
+  lastName              String?
+  profileImage          String?
+  visibility            Visibility?
+  language              Language?
+  timezone              String?
+  theme                 Theme?
+  stripeId              String?
+  active                Boolean                 @default(false)
+  role                  String                  @default("user")
+  createdAt             DateTime?               @default(now())
+  updatedAt             DateTime?               @updatedAt
+  SubAccount            SubAccount[]
+  OtpCode               OtpCode[]
+  Subscription          Subscription[]
+  Goal                  Goal[]
+  SubscriptionDowngrade SubscriptionDowngrade[]
+  Tag                   Tag[]
+  Playbook              Playbook[]
+  EconomicCalendar      EconomicCalendar[]
+
+  NotebookTag    NotebookTag[]
+  NotebookFolder NotebookFolder[]
+
+  Group         Group[]
+  GroupMembers  GroupMembers[]
+  Message       Message[]
+  senderChats   Chat[]         @relation("SenderChats")
+  receiverChats Chat[]         @relation("ReceiverChats")
+  Chat          Chat[]
+}
+
+model SubAccount {
+  id                      String                @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String?
+  broker                  String?
+  ProfitCalculationMethod String?
+  status                  String?
+  balance                 Int?
+  userId                  String                @db.ObjectId
+  user                    User                  @relation(fields: [userId], references: [id])
+  createdAt               DateTime?             @default(now())
+  updatedAt               DateTime?             @updatedAt
+  BalanceChange           BalanceChange[]
+  HistoryMyTrade          HistoryMyTrade[]
+  Commission              Commission[]
+  SubAccountReference     SubAccountReference[]
+  Goal                    Goal[]
+  Playbook                Playbook[]
+  SharedTrade             SharedTrade[]
+  NotebookNote            NotebookNote[]
+  NotebookTag             NotebookTag[]
+  NotebookFolder          NotebookFolder[]
+}
+
+model BalanceChange {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  change       Int?
+  subAccountId String     @db.ObjectId
+  subAccount   SubAccount @relation(fields: [subAccountId], references: [id])
+  createdAt    DateTime?  @default(now())
+  updatedAt    DateTime?  @updatedAt
+}
+
+model OtpCode {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  expiresAt DateTime
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  code      Int
+  purpose   String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model HistoryMyTrade {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  TimeZone      String?
+  subUserId     String          @db.ObjectId
+  subAccount    SubAccount      @relation(fields: [subUserId], references: [id])
+  data          Json
+  openTime      DateTime?
+  closeTime     DateTime?
+  status        String          @default("Closed")
+  entryImage    String?
+  exitImage     String?
+  createdAt     DateTime?       @default(now())
+  updatedAt     DateTime?       @updatedAt
+  TradeTags     TradeTags[]
+  PlaybookTrade PlaybookTrade[]
+  NotebookNote  NotebookNote[]
+  SharedTrade   SharedTrade[]
+}
+
+model Currency {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  date         String
+  baseCurrency String
+  conversion   Json
+  expiresAt    DateTime?
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+}
+
+model Commission {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  subAccountId String     @db.ObjectId
+  subAccount   SubAccount @relation(fields: [subAccountId], references: [id])
+  instrument   Instrument
+  symbol       String?
+  mode         Mode
+  apply        Apply
+  commission   Float?
+  fee          Float?
+  createdAt    DateTime?  @default(now())
+  updatedAt    DateTime?  @updatedAt
+}
+
+model SubAccountReference {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  subAccountId   String     @db.ObjectId
+  subAccount     SubAccount @relation(fields: [subAccountId], references: [id])
+  accountId      String?
+  authKey        String
+  broker         String?
+  status         String     @default("inactive")
+  additionalData Json?
+  createdAt      DateTime?  @default(now())
+  updatedAt      DateTime?  @updatedAt
+}
+
+model Subscription {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String    @db.ObjectId
+  user         User      @relation(fields: [userId], references: [id])
+  package      String
+  purchaseDate DateTime
+  endDate      DateTime
+  period       Period    @default(month)
+  autoRenew    Boolean   @default(false)
+  expired      Boolean   @default(false)
+  price        Float?
+  permissions  Json?
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+}
+
+model Goal {
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String     @db.ObjectId
+  user               User       @relation(fields: [userId], references: [id])
+  subAccountId       String     @db.ObjectId
+  subAccount         SubAccount @relation(fields: [subAccountId], references: [id])
+  dailyProfitGoal    Int        @default(0)
+  dailyLossGoal      Int        @default(0)
+  dailyTradeGoal     Int        @default(0)
+  maxTradedContracts Int        @default(0)
+  createdAt          DateTime?  @default(now())
+  updatedAt          DateTime?  @updatedAt
+}
+
+model SubscriptionDowngrade {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  nextPackage String?
+  startDate   DateTime?
+  price       Float?
+  period      String?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+}
+
+model Tag {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  type        String?
+  description String?
+  userId      String      @db.ObjectId
+  user        User        @relation(fields: [userId], references: [id])
+  TradeTags   TradeTags[]
+  createdAt   DateTime?   @default(now())
+  updatedAt   DateTime?   @updatedAt
+}
+
+model TradeTags {
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId   String         @db.ObjectId
+  tagId     String         @db.ObjectId
+  trade     HistoryMyTrade @relation(fields: [tradeId], references: [id])
+  tag       Tag            @relation(fields: [tagId], references: [id])
+  createdAt DateTime?      @default(now())
+  updatedAt DateTime?      @updatedAt
+
+  @@unique([tradeId, tagId])
+}
+
+model Playbook {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  description    String?
+  icon           String?
+  criteriaGroups Json
+  userId         String          @db.ObjectId
+  user           User            @relation(fields: [userId], references: [id])
+  subAccountId   String          @db.ObjectId
+  subAccount     SubAccount      @relation(fields: [subAccountId], references: [id])
+  createdAt      DateTime?       @default(now())
+  updatedAt      DateTime?       @updatedAt
+  PlaybookTrade  PlaybookTrade[]
+}
+
+model PlaybookTrade {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId        String         @db.ObjectId
+  historyTrade   HistoryMyTrade @relation(fields: [tradeId], references: [id])
+  criteriaGroups Json
+  playbookId     String         @db.ObjectId
+  playbook       Playbook       @relation(fields: [playbookId], references: [id])
+  createdAt      DateTime?      @default(now())
+  updatedAt      DateTime?      @updatedAt
+}
+
+model NotebookNote {
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  content      String?
+  folderId     String?
+  type         NoteType?
+  userId       String          @db.ObjectId
+  subAccountId String?         @db.ObjectId
+  subAccount   SubAccount?     @relation(fields: [subAccountId], references: [id])
+  day          String?
+  date         String?
+  tradeId      String?         @db.ObjectId
+  trade        HistoryMyTrade? @relation(fields: [tradeId], references: [id])
+
+  tagId                String?                @db.ObjectId
+  tag                  NotebookTag?           @relation(fields: [tagId], references: [id])
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  NotebookFolder       NotebookFolder?        @relation(fields: [notebookFolderId], references: [id])
+  notebookFolderId     String?                @db.ObjectId
+  NotebookTagsRelation NotebookTagsRelation[]
+}
+
+model NotebookTag {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+
+  user         User        @relation(fields: [userId], references: [id])
+  subAccountId String?     @db.ObjectId
+  subAccount   SubAccount? @relation(fields: [subAccountId], references: [id])
+  name         String
+  createdAt    DateTime?   @default(now())
+  updatedAt    DateTime?   @updatedAt
+
+  notes                NotebookNote[]
+  NotebookTagsRelation NotebookTagsRelation[]
+}
+
+model NotebookFolder {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  color     String
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  subAccountId String?        @db.ObjectId
+  subAccount   SubAccount?    @relation(fields: [subAccountId], references: [id])
+  NotebookNote NotebookNote[]
+}
+
+model NotebookTagsRelation {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  noteId String @db.ObjectId
+  tagId  String @db.ObjectId
+
+  note      NotebookNote @relation(fields: [noteId], references: [id])
+  tag       NotebookTag  @relation(fields: [tagId], references: [id])
+  createdAt DateTime?    @default(now())
+  updatedAt DateTime?    @updatedAt
+}
+
+model SharedTrade {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId             String?         @db.ObjectId
+  trade               HistoryMyTrade? @relation(fields: [tradeId], references: [id])
+  subAccountId        String?         @db.ObjectId
+  subAccount          SubAccount?     @relation(fields: [subAccountId], references: [id])
+  showNetPNL          Boolean?
+  showTradeNotes      Boolean?
+  showTags            Boolean?
+  showPlaybooks       Boolean?
+  showEntryExitImages Boolean?
+  createdAt           DateTime?       @default(now())
+  updatedAt           DateTime?       @updatedAt
+}
+
+model EconomicCalendar {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  countries      Json?
+  newsImportance Json?
+  userId         String    @db.ObjectId
+  user           User      @relation(fields: [userId], references: [id])
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime? @updatedAt
+}
+
+model Group {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  image          String? // optional
+  unreadMessages Int
+  lastMessageId  String?        @db.ObjectId
+  lastMessage    Message?       @relation("lastMessage", fields: [lastMessageId], references: [id])
+  visibility     VisibilityType
+  adminId        String         @db.ObjectId
+  admin          User           @relation(fields: [adminId], references: [id])
+  messages       Message[]
+  members        GroupMembers[]
+
+  // Message Message[] @relation("LastMessageRefrence")
+}
+
+model GroupMembers {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id])
+  groupId String @db.ObjectId
+  group   Group  @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Message {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  senderId String    @db.ObjectId
+  sender   User      @relation(fields: [senderId], references: [id])
+  text     String?
+  sentTime DateTime
+  readBy   Json
+  timeRead DateTime?
+
+  chatId String? @db.ObjectId
+  chat   Chat?   @relation(fields: [chatId], references: [id])
+
+  groupId             String? @db.ObjectId
+  group               Group?  @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lastMessage Group[] @relation("lastMessage")
+  files                File[]
+
+  LastMessageChats Chat[] @relation("LastMessage")
+}
+
+model Chat {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  senderId String @db.ObjectId
+  sender   User   @relation("SenderChats", fields: [senderId], references: [id])
+
+  receiverId String @db.ObjectId
+  receiver   User   @relation("ReceiverChats", fields: [receiverId], references: [id])
+
+  unreadMessages Int
+  lastMessageId  String?  @db.ObjectId
+  lastMessage    Message? @relation("LastMessage", fields: [lastMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  messages Message[] // Assuming Message model relates to Chat
+  User     User?     @relation(fields: [userId], references: [id])
+  userId   String?   @db.ObjectId
+}
+
+model File {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  messageId String   @db.ObjectId
+  type      FileType
+  url       String
+
+  message   Message   @relation(fields: [messageId], references: [id])
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+}
