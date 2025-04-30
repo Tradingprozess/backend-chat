@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { setupSocketServer } = require('./sockets/socket');
+const autoSyncRouter = require('./routes/auto-sync-router');
 
 // Create Express app
 const app = express();
@@ -14,6 +15,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+app.use('/auto-sync', autoSyncRouter)
 
 
 // Error handling middleware

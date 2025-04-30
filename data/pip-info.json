@@ -1,0 +1,90 @@
+{
+  "JPY": {
+    "pipSize": 0.01,
+    "lotSize": 100000
+  },
+  "XAU": {
+    "pipSize": 0.01,
+    "lotSize": 100
+  },
+  "XAG": {
+    "pipSize": 0.01,
+    "lotSize": 5000
+  },
+  "XPT": {
+    "pipSize": 0.01,
+    "lotSize": 100
+  },
+  "XPD": {
+    "pipSize": 0.01,
+    "lotSize": 100
+  },
+  "HG": {
+    "pipSize": 0.0005,
+    "lotSize": 25000
+  },
+  "WTI": {
+    "pipSize": 0.01,
+    "lotSize": 1000
+  },
+  "BRENT": {
+    "pipSize": 0.01,
+    "lotSize": 1000
+  },
+  "NG": {
+    "pipSize": 0.001,
+    "lotSize": 10000
+  },
+  "ZC": {
+    "pipSize": 0.25,
+    "lotSize": 50
+  },
+  "ZS": {
+    "pipSize": 0.25,
+    "lotSize": 50
+  },
+  "ZW": {
+    "pipSize": 0.25,
+    "lotSize": 50
+  },
+  "CT": {
+    "pipSize": 0.01,
+    "lotSize": 500
+  },
+  "KC": {
+    "pipSize": 0.05,
+    "lotSize": 37500
+  },
+  "SB": {
+    "pipSize": 0.01,
+    "lotSize": 112000
+  },
+  "CC": {
+    "pipSize": 1,
+    "lotSize": 10
+  },
+  "LE": {
+    "pipSize": 0.025,
+    "lotSize": 40000
+  },
+  "GF": {
+    "pipSize": 0.025,
+    "lotSize": 50000
+  },
+  "HE": {
+    "pipSize": 0.025,
+    "lotSize": 40000
+  },
+  "USOIL": {
+    "pipSize": 0.01,
+    "lotSize": 1000
+  },
+  "UKOIL": {
+    "pipSize": 0.01,
+    "lotSize": 1000
+  },
+  "Default": {
+    "pipSize": 0.0001,
+    "lotSize": 100000
+  }
+}

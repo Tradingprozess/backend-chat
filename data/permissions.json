@@ -1,0 +1,51 @@
+{
+  "MOBILE_APP": "pro-premium-elite-mobile-app",
+  "PAGE": {
+    "DASHBOARD": "page.dashboard",
+    "DAILY_JOURNAL": "page.daily-journal",
+    "TRADE_IMPORT": "page.trade-import",
+    "REPORTS": {
+      "OVERVIEW": "page.reports.overview",
+      "DAYS": "page.reports.days",
+      "MONTHS": "page.reports.months",
+      "SETUPS": "page.reports.setups",
+      "WIN_LOSS": "page.reports.win-loss",
+      "RISK_REWARD": "page.reports.risk-reward"
+    },
+    "NOTEBOOK": "page.notebook",
+    "PLAYBOOK": "page.playbook",
+    "COMMUNITY": "page.community"
+  },
+  "FEATURES": {
+    "ACCOUNT_BALANCE": "feature.account-balance",
+    "NET_PNL": "feature.net-pnl",
+    "AVG_WIN_LOSS": "feature.avg_win",
+    "DRAW_DOWN": "feature.draw-down",
+    "NET_CUMULATIVE": "feature.net-cumulative",
+    "DAILY_PNL": "feature.daily-pnl",
+    "PROFIT_FACTOR": "feature.profit-factor",
+    "WINNING_DAYS": "feature.winning-days",
+    "TRADE_JOURNAL": "feature.trade-journal",
+    "TRADES_MANUAL": "feature.trade-manual",
+    "SETUPS_TRACKING": "feature.setups-tracking",
+    "MISTAKES_TRACKING": "feature.mistakes-tracking",
+    "CUSTOMER_BEHAVIOUR": "feature.customer-behaviour",
+    "EMAIL_SUPPORT": "feature.email-support",
+    "CHAT_SUPPORT": "feature.chat-support",
+    "TRADE_CHARTING": "feature.trade-charting",
+    "CALENDAR_VIEW": "feature.calendar-view",
+    "ECONOMIC_CALENDAR": "feature.economic-calendar",
+    "RUNNING_PNL": "feature.running-pnl",
+    "INTELLIGENCE_INSIGHTS": "feature.intelligence-insights",
+    "AI_ASSISTANT": "feature.ai-assistant",
+    "TRADE_SHARING": "feature.trade-sharing",
+    "COMMUNITY_CHAT": "feature.community-chat",
+    "COMMUNITY_GROUP": "feature.community-group",
+    "PRIVATE_ACCOUNT_POSSIBILITY": "feature.private-account-possibility",
+    "PUBLIC_ACCOUNT_POSSIBILITY": "feature.public-account-possibility",
+    "USER_GUIDES": "feature.user-guides",
+    "WEEKLY_EMAIL_REPORT": "feature.weekly-email-report",
+    "MAX_ACCOUNTS_2": "feature.max-accounts.2",
+    "MAX_ACCOUNTS_UNLIMITED": "feature.max-accounts.unlimited"
+  }
+}

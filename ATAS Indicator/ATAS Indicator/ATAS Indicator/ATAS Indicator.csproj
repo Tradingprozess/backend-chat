@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>ATAS_Indicator</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>TradingProzess_ATAS_Indicator</AssemblyName>
+    <UseWindowsForms>true</UseWindowsForms>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ATAS.DataFeedsCore">
+      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.DataFeedsCore.dll</HintPath>
+    </Reference>
+    <Reference Include="ATAS.Indicators">
+      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.Indicators.dll</HintPath>
+    </Reference>
+    <Reference Include="ATAS.Indicators.Other">
+      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.Indicators.Other.dll</HintPath>
+    </Reference>
+    <Reference Include="ATAS.Indicators.Technical">
+      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.Indicators.Technical.dll</HintPath>
+    </Reference>
+    <Reference Include="OFT.Rendering">
+      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\OFT.Rendering.dll</HintPath>
+    </Reference>
+    <Reference Include="Utils.Common">
+      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\Utils.Common.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
