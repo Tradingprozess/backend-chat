@@ -9,15 +9,6 @@ const createSubAccountReference = async (req, res, next) => {
     const { id, subAccountId, accountId, broker, code, userId } = req.body;
     const allowedBrokers = ["Atas", "Ninja Trader", "MT5", "MT4"];
 
-    console.log("Data to create ref:", {
-      id,
-      subAccountId,
-      accountId,
-      broker,
-      code,
-      userId,
-    });
-
     // Validation checks
     if (!subAccountId)
       return res.status(400).json({ error: "Invalid Sub Account Id" });
@@ -286,7 +277,6 @@ const getAutoSyncReferences = async (req, res) => {
       select: { userId: true },
     });
 
-    console.log("SubAccount:", subAccount);
     if (!subAccount || !subAccount.userId) {
       return res.status(400).json({ error: "Invalid subaccount" });
     }
