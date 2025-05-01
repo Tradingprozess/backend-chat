@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const TradovateAPIService = require("../services/TradovateAPIService");
 const { generateOtp } = require("../methods/utils");
@@ -6,25 +6,38 @@ const { v4: uuidv4 } = require("uuid");
 
 const createSubAccountReference = async (req, res, next) => {
   try {
-    const { id, subAccountId, accountId, broker, code } = req.body;
+    const { id, subAccountId, accountId, broker, code, userId } = req.body;
     const allowedBrokers = ["Atas", "Ninja Trader", "MT5", "MT4"];
 
+    console.log("Data to create ref:", {
+      id,
+      subAccountId,
+      accountId,
+      broker,
+      code,
+      userId,
+    });
+
     // Validation checks
-    if (!subAccountId) return res.status(400).json({ error: "Invalid Sub Account Id" });
-    if (!accountId) return res.status(400).json({ error: "Invalid Account Id" });
+    if (!subAccountId)
+      return res.status(400).json({ error: "Invalid Sub Account Id" });
+    if (!accountId)
+      return res.status(400).json({ error: "Invalid Account Id" });
     if (!broker) return res.status(400).json({ error: "Invalid Broker" });
     if (!allowedBrokers.includes(broker)) {
       return res.status(400).json({
-        error: `Broker not allowed. Allowed brokers: ${allowedBrokers.join(",")}`
+        error: `Broker not allowed. Allowed brokers: ${allowedBrokers.join(
+          ","
+        )}`,
       });
     }
 
     // Get user's subaccounts
     const subAccounts = await prisma.subAccount.findMany({
-      where: { userId: req.user.id },
-      select: { id: true }
+      where: { userId: userId },
+      select: { id: true },
     });
-    const subAccountIds = subAccounts.map(acc => acc.id);
+    const subAccountIds = subAccounts.map((acc) => acc.id);
 
     if (!subAccountIds.includes(subAccountId)) {
       return res.status(400).json({ error: "Invalid Sub Account Id" });
@@ -35,12 +48,14 @@ const createSubAccountReference = async (req, res, next) => {
       where: {
         subAccountId: { in: subAccountIds },
         accountId,
-        broker
-      }
+        broker,
+      },
     });
 
     if (similarReference && similarReference.status === "active") {
-      return res.status(400).json({ error: "Cannot attach same account again" });
+      return res
+        .status(400)
+        .json({ error: "Cannot attach same account again" });
     }
 
     // Ninja Trader flow
@@ -53,15 +68,15 @@ const createSubAccountReference = async (req, res, next) => {
             accountId,
             broker,
             status: "inactive",
-            authKey: "-"
-          }
+            authKey: "-",
+          },
         });
       }
-      const state = { 
+      const state = {
         id: subAccountReference.id,
         broker,
         subAccountId,
-        accountId
+        accountId,
       };
       return res.json({ url: TradovateAPIService.GetOAuthUrl(state) });
     }
@@ -71,8 +86,8 @@ const createSubAccountReference = async (req, res, next) => {
       where: {
         subAccountId: { in: subAccountIds },
         status: "active",
-        broker
-      }
+        broker,
+      },
     });
 
     // Handle non-Ninja brokers
@@ -83,12 +98,12 @@ const createSubAccountReference = async (req, res, next) => {
           accountId,
           broker,
           status: "active",
-          authKey: existingReference.authKey
-        }
+          authKey: existingReference.authKey,
+        },
       });
-      return res.json({ 
+      return res.json({
         accountReference: newReference,
-        usingExistingReference: true
+        usingExistingReference: true,
       });
     }
 
@@ -101,8 +116,8 @@ const createSubAccountReference = async (req, res, next) => {
 
       const authKey = authResponse.access_token;
       const accounts = await TradovateAPIService.GetAccountsList(authKey);
-      const account = accounts.find(acc => 
-        acc.name === accountId || acc.nickname === accountId
+      const account = accounts.find(
+        (acc) => acc.name === accountId || acc.nickname === accountId
       );
 
       if (!account) {
@@ -116,9 +131,9 @@ const createSubAccountReference = async (req, res, next) => {
           status: "active",
           additionalData: {
             userId: account.userId,
-            accountId: account.id
-          }
-        }
+            accountId: account.id,
+          },
+        },
       });
 
       await TradovateAPIService.InitializeForUser(
@@ -128,9 +143,9 @@ const createSubAccountReference = async (req, res, next) => {
         account.userId
       );
 
-      return res.json({ 
+      return res.json({
         accountReference: updatedReference,
-        refreshBase: true
+        refreshBase: true,
       });
     }
 
@@ -142,18 +157,18 @@ const createSubAccountReference = async (req, res, next) => {
           accountId,
           broker,
           status: "active",
-          authKey: uuidv4()
-        }
+          authKey: uuidv4(),
+        },
       });
       return res.json({ accountReference: newReference });
     }
 
     // OTP flow for other brokers
     const existingOtp = await prisma.otpCode.findFirst({
-      where: { 
+      where: {
         userId: subAccountId,
-        purpose: "auto-sync"
-      }
+        purpose: "auto-sync",
+      },
     });
 
     if (existingOtp) {
@@ -166,8 +181,8 @@ const createSubAccountReference = async (req, res, next) => {
         accountId,
         broker,
         status: "inactive",
-        authKey: uuidv4()
-      }
+        authKey: uuidv4(),
+      },
     });
 
     const otp = generateOtp(6);
@@ -178,19 +193,17 @@ const createSubAccountReference = async (req, res, next) => {
       data: {
         expiresAt,
         userId: subAccountId,
-        code: otp,
-        purpose: "auto-sync"
-      }
+        code: Number(otp),
+        purpose: "auto-sync",
+      },
     });
 
     res.json({ otp, accountReference: newReference });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const authenticateAutoSyncPlugin = async (req, res, next) => {
   try {
@@ -210,7 +223,9 @@ const authenticateAutoSyncPlugin = async (req, res, next) => {
       where: { id: req.references[0].subAccountId },
     });
 
-    const user = await prisma.user.findFirst({ where: { id: subAccount.userId } });
+    const user = await prisma.user.findFirst({
+      where: { id: subAccount.userId },
+    });
 
     return res
       .status(200)
@@ -227,7 +242,7 @@ const verifyAutoSync = async (req, res) => {
     if (!code) return res.status(400).json({ error: "Code required" });
 
     const otpData = await prisma.otpCode.findFirst({
-      where: { code: parseInt(code) }
+      where: { code: parseInt(code) },
     });
 
     if (!otpData) return res.status(400).json({ error: "Invalid code" });
@@ -236,10 +251,10 @@ const verifyAutoSync = async (req, res) => {
     }
 
     const reference = await prisma.subAccountReference.findFirst({
-      where: { 
+      where: {
         subAccountId: otpData.userId,
-        status: "inactive"
-      }
+        status: "inactive",
+      },
     });
 
     if (!reference) {
@@ -248,15 +263,14 @@ const verifyAutoSync = async (req, res) => {
 
     const updatedReference = await prisma.subAccountReference.update({
       where: { id: reference.id },
-      data: { status: "active" }
+      data: { status: "active" },
     });
 
     await prisma.otpCode.deleteMany({
-      where: { userId: otpData.userId }
+      where: { userId: otpData.userId },
     });
 
     res.json({ authKey: updatedReference.authKey });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -269,22 +283,22 @@ const getAutoSyncReferences = async (req, res) => {
 
     const subAccount = await prisma.subAccount.findUnique({
       where: { id: subAccountId },
-      select: { userId: true }
+      select: { userId: true },
     });
 
-    if (!subAccount || subAccount.userId !== req.user.id) {
+    console.log("SubAccount:", subAccount);
+    if (!subAccount || !subAccount.userId) {
       return res.status(400).json({ error: "Invalid subaccount" });
     }
 
     const references = await prisma.subAccountReference.findMany({
-      where: { 
+      where: {
         subAccountId,
-        broker
-      }
+        broker,
+      },
     });
 
     res.json({ references });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -296,7 +310,7 @@ const deleteAutoSyncReference = async (req, res) => {
     const { id } = req.params;
 
     const reference = await prisma.subAccountReference.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!reference) {
@@ -306,20 +320,20 @@ const deleteAutoSyncReference = async (req, res) => {
     // Verify ownership
     const subAccount = await prisma.subAccount.findUnique({
       where: { id: reference.subAccountId },
-      select: { userId: true }
+      select: { userId: true },
     });
 
-    if (!subAccount || subAccount.userId !== req.user.id) {
+    if (!subAccount || !subAccount.userId) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
     await prisma.$transaction([
       prisma.otpCode.deleteMany({
-        where: { userId: reference.subAccountId }
+        where: { userId: reference.subAccountId },
       }),
       prisma.subAccountReference.delete({
-        where: { id }
-      })
+        where: { id },
+      }),
     ]);
 
     if (reference.broker === "Ninja Trader" && reference.additionalData) {
@@ -328,7 +342,6 @@ const deleteAutoSyncReference = async (req, res) => {
     }
 
     res.json({ message: "Reference deleted successfully" });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -340,5 +353,5 @@ module.exports = {
   verifyAutoSync,
   authenticateAutoSyncPlugin,
   getAutoSyncReferences,
-  deleteAutoSyncReference
+  deleteAutoSyncReference,
 };
