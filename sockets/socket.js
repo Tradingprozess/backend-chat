@@ -23,8 +23,8 @@ function getFileTypeFromURL(url) {
     image: ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'webp'],
     video: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
     audio: ['mp3', 'wav', 'ogg', 'm4a'],
-    document: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'],
-    archive: ['zip', 'rar', '7z', 'tar', 'gz'],
+    other: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'],
+    other: ['zip', 'rar', '7z', 'tar', 'gz'],
   };
 
   for (const [type, extensions] of Object.entries(typeMap)) {
