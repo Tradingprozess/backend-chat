@@ -12,9 +12,9 @@ namespace ATAS_Indicator.Static
 
         /// <summary>
         /// Local URI: http://localhost:3001
-        /// Live URI: https://tradingprozess.com/backend
+        /// Live URI: https://backstaging.tradingprozess.com/backend
         /// </summary>
-        private const string BASE_URI = "https://tradingprozess.com/backend";
+        private const string BASE_URI = "https://backstaging.tradingprozess.com/backend";
 
         #endregion
 
