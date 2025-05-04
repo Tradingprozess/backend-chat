@@ -3,6 +3,7 @@ const prisma = new PrismaClient();
 const TradovateAPIService = require("../services/TradovateAPIService");
 const { generateOtp } = require("../methods/utils");
 const { v4: uuidv4 } = require("uuid");
+const TradingService = require("../services/TradingService");
 
 const createSubAccountReference = async (req, res, next) => {
   try {
@@ -338,10 +339,55 @@ const deleteAutoSyncReference = async (req, res) => {
   }
 };
 
+// ==================== Auto Sync Hooks ============================= //
+
+const addTradeHook = async (req, res, next) => {
+  try {
+    // {"tradeId": "827709905","accountId": "207224084","type": "BUY","securityId": "BTCUSD","price": 83699.07,"volume": 0.10,"commission": 0.00,"captureEntry": true,"captureExit": false,"image": "entry_827709905.png"}
+    const {tradeId, accountId, type, securityId, price, volume, commission, image, captureEntry, captureExit} = req.body;
+    console.log(tradeId, accountId, type, securityId, price, volume, commission);
+    const authKey = req.headers.auth;
+    const broker = req.references[0].broker;
+
+    await TradingService.insertAutoSyncTrade(broker, authKey, accountId, tradeId, type, securityId, price, volume, commission, image, captureEntry, captureExit);
+
+    return res.status(200).json({message: "Trade added successfully"});
+  }
+  catch (error) {
+    console.log(error)
+    return res.status(500).json({error: error.message});
+  }
+}
+
+const limitDataHook = async (req, res, next) => {
+  try {
+    const {accountId, type, price, securityId} = req.body;
+    const authKey = req.headers.auth;
+
+    if(!accountId || !type || price === undefined) {
+      return res.status(400).json({error: "Invalid Data"});
+    }
+
+    const broker = req.references[0].broker;
+
+    const {user, subAccount} = await TradingService.validateSubAccount(accountId, authKey, broker);
+
+    await TradingService.applyStopLossOrTakeProfit(subAccount, securityId, type, price);
+
+    return res.status(200).json({message: "Trade Limit Updated successfully"});
+  }
+  catch (error) {
+    console.log(error)
+    return res.status(500).json({error: error.message});
+  }
+}
+
 module.exports = {
   createSubAccountReference,
   verifyAutoSync,
   authenticateAutoSyncPlugin,
   getAutoSyncReferences,
   deleteAutoSyncReference,
+  addTradeHook,
+  limitDataHook
 };

@@ -13,4 +13,8 @@ router.get('/all/:subAccountId/:broker',  autoSyncController.getAutoSyncReferenc
 
 router.delete('/:id',  autoSyncController.deleteAutoSyncReference);
 
+router.post('/add/limit', authenticatePlugin(), autoSyncController.limitDataHook)
+
+router.post('/add/trade', authenticatePlugin(), autoSyncController.addTradeHook);
+
 module.exports = router;

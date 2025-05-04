@@ -14,7 +14,7 @@ namespace ATAS_Indicator.Static
         /// Local URI: http://localhost:3001
         /// Live URI: https://backstaging.tradingprozess.com/backend
         /// </summary>
-        private const string BASE_URI = "https://backstaging.tradingprozess.com/backend";
+        private const string BASE_URI = "https://backstaging.tradingprozess.com";
 
         #endregion
 
@@ -37,12 +37,12 @@ namespace ATAS_Indicator.Static
         /// <summary>
         /// Route to autosync trades from the indicator to the trading prozess
         /// </summary>
-        public static string ADD_TRADE = GetRoute("history-my-trades/add/trade");
+        public static string ADD_TRADE = GetRoute("auto-sync/add/trade");
 
         /// <summary>
         /// Route to autosync trade limits from the indicator to the trading prozess
         /// </summary>
-        public static string ADD_TRADE_LIMITS = GetRoute("history-my-trades/add/limit");
+        public static string ADD_TRADE_LIMITS = GetRoute("auto-sync/add/limit");
 
         /// <summary>
         /// Used to submit an otp to verify the connection and to enable auto sync
