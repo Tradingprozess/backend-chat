@@ -249,7 +249,6 @@ const verifyAutoSync = async (req, res) => {
     const reference = await prisma.subAccountReference.findFirst({
       where: {
         subAccountId: otpData.userId,
-        status: "inactive",
       },
     });
 
