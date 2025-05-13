@@ -1,0 +1,42 @@
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Indicator.csproj.AssemblyReference.cache
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS_Indicator.TradingProzessForm.resources
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Indicator.csproj.GenerateResource.cache
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Indicator.GeneratedMSBuildEditorConfig.editorconfig
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Indicator.AssemblyInfoInputs.cache
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Indicator.AssemblyInfo.cs
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Indicator.csproj.CoreCompileInputs.cache
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Indicator.sourcelink.json
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\TradingProzess_ATAS_Indicator.deps.json
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\TradingProzess_ATAS_Indicator.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\TradingProzess_ATAS_Indicator.pdb
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\ATAS.DataFeedsCore.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\ATAS.Indicators.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\ATAS.Indicators.Other.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\ATAS.Indicators.Technical.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\OFT.Rendering.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\Utils.Common.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\OFT.Localization.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\OFT.Attributes.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\QLNet.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\SkiaSharp.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\CommandLine.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\websocket-sharp.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\System.IO.Pipelines.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\Pipelines.Sockets.Unofficial.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\log4net.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\protobuf-net.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\Macross.Json.Extensions.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\protobuf-net.Core.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\de-de\ATAS.Indicators.Technical.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\ru-ru\ATAS.Indicators.Technical.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\de-de\OFT.Localization.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\es-es\OFT.Localization.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\fr-fr\OFT.Localization.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\hi-in\OFT.Localization.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\ru-ru\OFT.Localization.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\bin\Release\net8.0-windows\zh-cn\OFT.Localization.resources.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ATAS Ind.37011E48.Up2Date
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\TradingProzess_ATAS_Indicator.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\refint\TradingProzess_ATAS_Indicator.dll
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\TradingProzess_ATAS_Indicator.pdb
+D:\Ammad\work\TradingProcess\chatserver\ATAS Indicator\ATAS Indicator\ATAS Indicator\obj\Release\net8.0-windows\ref\TradingProzess_ATAS_Indicator.dll

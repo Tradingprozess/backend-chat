@@ -5,7 +5,7 @@ const authenticatePlugin = () => {
   return async (req, res, next) => {
     try {
       const authKey = req.headers.auth;
-
+      console.log("authkey",authKey)
       if (!authKey) {
         return res.status(401).json({ error: "Authentication key missing" });
       }
@@ -13,6 +13,9 @@ const authenticatePlugin = () => {
       const subAccountReferences = await prisma.subAccountReference.findMany({
         where: { authKey }
       });
+
+      console.log("authkey subAccountReferences",subAccountReferences)
+
 
       if (subAccountReferences.length === 0) {
         return res.status(401).json({ 

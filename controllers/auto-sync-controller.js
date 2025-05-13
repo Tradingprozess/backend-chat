@@ -199,6 +199,7 @@ const createSubAccountReference = async (req, res, next) => {
 
 const authenticateAutoSyncPlugin = async (req, res, next) => {
   try {
+    console.log("Trigred authenticateAutoSyncPlugin Api", req.references)
     if (!req.references) {
       return res.status(400).json({ error: "Invalid Data" });
     }
@@ -206,6 +207,8 @@ const authenticateAutoSyncPlugin = async (req, res, next) => {
     const referenceAccountIds = req.references.map(
       (reference) => reference.accountId
     );
+    console.log("Trigred referenceAccountIds ",referenceAccountIds)
+
 
     if (referenceAccountIds.length === 0) {
       return res.status(404).json({ error: "No account references found" });
@@ -230,7 +233,9 @@ const authenticateAutoSyncPlugin = async (req, res, next) => {
 
 const verifyAutoSync = async (req, res) => {
   try {
+
     const { code } = req.body;
+    console.log("Trigred Code Api",code)
     if (!code) return res.status(400).json({ error: "Code required" });
 
     const otpData = await prisma.otpCode.findFirst({
@@ -238,9 +243,8 @@ const verifyAutoSync = async (req, res) => {
     });
 
     if (!otpData) return res.status(400).json({ error: "Invalid code" });
-    if (new Date() > otpData.expiresAt) {
-      return res.status(400).json({ error: "Code expired" });
-    }
+
+    console.log("otpData",otpData)
 
     const reference = await prisma.subAccountReference.findFirst({
       where: {
@@ -258,9 +262,7 @@ const verifyAutoSync = async (req, res) => {
       data: { status: "active" },
     });
 
-    await prisma.otpCode.deleteMany({
-      where: { userId: otpData.userId },
-    });
+    console.log("updatedReference.authKey",updatedReference.authKey)
 
     res.json({ authKey: updatedReference.authKey });
   } catch (error) {

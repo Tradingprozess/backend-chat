@@ -16,22 +16,22 @@
 
   <ItemGroup>
     <Reference Include="ATAS.DataFeedsCore">
-      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.DataFeedsCore.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\ATAS Platform\ATAS.DataFeedsCore.dll</HintPath>
     </Reference>
     <Reference Include="ATAS.Indicators">
-      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.Indicators.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\ATAS Platform\ATAS.Indicators.dll</HintPath>
     </Reference>
     <Reference Include="ATAS.Indicators.Other">
-      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.Indicators.Other.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\ATAS Platform\ATAS.Indicators.Other.dll</HintPath>
     </Reference>
     <Reference Include="ATAS.Indicators.Technical">
-      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\ATAS.Indicators.Technical.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\ATAS Platform\ATAS.Indicators.Technical.dll</HintPath>
     </Reference>
     <Reference Include="OFT.Rendering">
-      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\OFT.Rendering.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\ATAS Platform\OFT.Rendering.dll</HintPath>
     </Reference>
     <Reference Include="Utils.Common">
-      <HintPath>..\..\..\..\..\..\..\Applications\ATAS Platform\Utils.Common.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\ATAS Platform\Utils.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
 
