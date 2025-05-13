@@ -264,7 +264,7 @@ const verifyAutoSync = async (req, res) => {
 
     console.log("updatedReference.authKey",updatedReference.authKey)
 
-    res.json({ authKey: updatedReference.authKey });
+    res.json({ data: {authKey: updatedReference.authKey} });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
