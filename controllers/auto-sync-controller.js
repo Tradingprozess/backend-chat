@@ -273,6 +273,8 @@ const verifyAutoSync = async (req, res) => {
 
 const getAutoSyncReferences = async (req, res) => {
   try {
+    console.log("Trigred getAutoSyncReferences Api", req.params)
+
     const { subAccountId, broker } = req.params;
 
     const subAccount = await prisma.subAccount.findUnique({
@@ -363,6 +365,8 @@ const addTradeHook = async (req, res, next) => {
 
 const limitDataHook = async (req, res, next) => {
   try {
+    console.log("Trigred limitDataHook Api", req.body)
+
     const {accountId, type, price, securityId} = req.body;
     const authKey = req.headers.auth;
 
