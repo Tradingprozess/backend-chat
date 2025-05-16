@@ -1,10 +1,17 @@
 {
   "version": 2,
-  "dgSpecHash": "GRr+ZcQ1CRA=",
+  "dgSpecHash": "il9Iixt+Sps=",
   "success": true,
   "projectFilePath": "D:\\Ammad\\work\\TradingProcess\\chatserver\\ATAS Indicator\\ATAS Indicator\\ATAS Indicator\\ATAS Indicator.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ZA BAWANI\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
+    }
+  ]
 }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TradingProzess_ATAS_Indicator")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5d201a65679d8703720baf1ac21aa9ebcd44a620")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f16e17500db702c1e5a6ab2e4d1321a2f0e00e2")]
 [assembly: System.Reflection.AssemblyProductAttribute("TradingProzess_ATAS_Indicator")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TradingProzess_ATAS_Indicator")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
