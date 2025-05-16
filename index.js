@@ -5,14 +5,14 @@ const { setupSocketServer } = require('./sockets/socket');
 const autoSyncRouter = require('./routes/auto-sync-router');
 const bodyParser = require("body-parser");
 
-
-app.use(bodyParser.json({limit: "100mb"}));
-app.use(bodyParser.urlencoded({limit: "100mb", extend: true, parameterLimit: 50000}));
 // Create Express app
 const app = express();
 setupSocketServer(app);
 
 // Middleware
+
+app.use(bodyParser.json({limit: "100mb"}));
+app.use(bodyParser.urlencoded({limit: "100mb", extend: true, parameterLimit: 50000}));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
