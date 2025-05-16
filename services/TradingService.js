@@ -14,7 +14,7 @@ class TradingService {
         if (assetType === AssetType.Futures) {
             const sec2 = securityId.slice(0, 2);
             const sec3 = securityId.slice(0, 3);
-            for (const instrument of Object.keys(symbolsData)) {
+            for (let instrument of Object.keys(symbolsData)) {
                 if (symbolsData[instrument]?.some(symbol =>
                     symbol.startsWith(sec2) || symbol.startsWith(sec3)
                 )) {
@@ -22,7 +22,7 @@ class TradingService {
                 }
             }
         } else if (assetType === AssetType.Forex) {
-            for (const instrument of Object.keys(symbolsData)) {
+            for (let instrument of Object.keys(symbolsData)) {
                 if (symbolsData[instrument]?.includes(securityId)) {
                     return instrument;
                 }
@@ -93,7 +93,7 @@ class TradingService {
         let currentGroupId = 1;
         const sortedData = this.sortEntriesByTime(data, 'OpenTime');
 
-        for (const entry of sortedData) {
+        for (let entry of sortedData) {
             const entryTradeCommission = await this.calculateCommission(
                 entry.SecurityId, subAccountId, entry.OpenVolume, entry.Commission, true, false
             );
@@ -199,7 +199,7 @@ class TradingService {
         const allContracts = [...Object.values(groupedContracts), ...unGroupedContracts];
         const tradesToRemove = new Set();
 
-        for (const contract of allContracts) {
+        for (let contract of allContracts) {
             const avgOpen = contract.OpenPrice / contract.Contracts.length;
             const avgClose = contract.ClosePrice / contract.Contracts.length;
             const assetType = TradeService.getAssetType(contract.Contracts[0].SecurityId);
@@ -258,7 +258,7 @@ class TradingService {
         const { subAccount, user } = await this.validateSubAccount(accountId, authKey, broker);
         return this.insertSingleTrade(
             subAccount,
-            user.createdAt,
+            null,
             securityId,
             type,
             new Date(),
@@ -306,6 +306,8 @@ class TradingService {
             trade.data?.OpenType === (type === 'Buy' ? 'Sell' : 'Buy')
         );
 
+        const entryImage = captureEntry ? await this.saveCapturedImage(image, uuidv4()+'_entry.png') : null
+
         if (!settle || openTrades.length === 0) {
             return prisma.historyMyTrade.create({
                 data: {
@@ -328,19 +330,20 @@ class TradingService {
                     },
                     openTime: time,
                     status: 'Open',
-                    entryImage: captureEntry ? this.saveCapturedImage(image, 'entry.png') : null
+                    entryImage: entryImage
                 }
             });
         }
 
         let volumeToSettle = volume;
-        for (const trade of openTrades) {
+        for (let trade of openTrades) {
             if (volumeToSettle <= 0) break;
 
             const remaining = Math.abs(trade.data.OpenVolume + trade.data.CloseVolume);
             const settled = Math.min(remaining, volumeToSettle);
             const newCloseVolume = trade.data.CloseVolume + (trade.data.Side === 'LONG' ? -settled : settled);
 
+            const exitImage = captureExit ? await this.saveCapturedImage(image, uuidv4()+'_exit.png') : null
             await prisma.historyMyTrade.update({
                 where: { id: trade.id },
                 data: {
@@ -369,7 +372,7 @@ class TradingService {
                         ]
                     },
                     status: settled === remaining ? 'Closed' : 'Partial',
-                    exitImage: captureExit ? this.saveCapturedImage(image, 'exit.png') : null
+                    exitImage: exitImage
                 }
             });
 
@@ -412,7 +415,7 @@ class TradingService {
             trade.data?.SecurityId === securityId
         );
 
-        for (const trade of openTrades) {
+        for (let trade of openTrades) {
             const update = { data: { ...trade.data } };
 
             if (type === 'auto') {
