@@ -218,9 +218,13 @@ const authenticateAutoSyncPlugin = async (req, res, next) => {
       where: { id: req.references[0].subAccountId },
     });
 
+    console.log("subAccount ", subAccount)
+    
     const user = await prisma.user.findFirst({
       where: { id: subAccount.userId },
     });
+    console.log("user ", user)
+    console.log("referenceAccountIds ", referenceAccountIds)
 
     return res
       .status(200)
@@ -245,12 +249,13 @@ const verifyAutoSync = async (req, res) => {
     if (!otpData) return res.status(400).json({ error: "Invalid Code" });
 
     console.log("otpData", otpData)
-
+    
     const reference = await prisma.subAccountReference.findFirst({
       where: {
         subAccountId: otpData.userId,
       },
     });
+    console.log("reference:", reference)
 
     if (!reference) {
       return res.status(400).json({ error: "No relevant reference found" });
@@ -280,10 +285,13 @@ const getAutoSyncReferences = async (req, res) => {
       where: { id: subAccountId },
       select: { userId: true },
     });
+    
+    console.log("subAccount",subAccount)
 
     if (!subAccount || !subAccount.userId) {
       return res.status(400).json({ error: "Invalid subaccount" });
     }
+
 
     const references = await prisma.subAccountReference.findMany({
       where: {
@@ -291,8 +299,10 @@ const getAutoSyncReferences = async (req, res) => {
         broker,
       },
     });
+    console.log("references",references)
 
-    res.json({ references });
+
+    res.status(200).json({ references });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -348,9 +358,10 @@ const addTradeHook = async (req, res, next) => {
   try {
     // {"tradeId": "827709905","accountId": "207224084","type": "BUY","securityId": "BTCUSD","price": 83699.07,"volume": 0.10,"commission": 0.00,"captureEntry": true,"captureExit": false,"image": "entry_827709905.png"}
     const { tradeId, accountId, type, securityId, price, volume, commission, image, captureEntry, captureExit } = req.body;
-    console.log(tradeId, accountId, type, securityId, price, volume, commission);
+    console.log("Add Trade Api Call",tradeId, accountId, type, securityId, price, volume, commission);
     const authKey = req.headers.auth;
     const broker = req.references[0].broker;
+    console.log("authKey broker",authKey,broker);
 
     await TradingService.insertAutoSyncTrade(broker, authKey, accountId, tradeId, type, securityId, price, volume, commission, image, captureEntry, captureExit);
 

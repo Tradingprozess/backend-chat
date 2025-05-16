@@ -2,13 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const symbolsData = require("../data/symbols-data.json");
 const moment = require("moment");
-const fs = require("fs");
-const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const TradeService = require("./trading/TradeService");
 const NumberService = require("./NumberService");
 const AssetType = require("../enums/AssetType");
 const ForexService = require("./trading/ForexService");
+const { uploadToS3FromBase64 } = require('./s3Service');
 
 class TradingService {
     static getInstrument(securityId, assetType) {
@@ -16,7 +15,7 @@ class TradingService {
             const sec2 = securityId.slice(0, 2);
             const sec3 = securityId.slice(0, 3);
             for (const instrument of Object.keys(symbolsData)) {
-                if (symbolsData[instrument]?.some(symbol => 
+                if (symbolsData[instrument]?.some(symbol =>
                     symbol.startsWith(sec2) || symbol.startsWith(sec3)
                 )) {
                     return instrument;
@@ -65,7 +64,7 @@ class TradingService {
 
         if (!commissionData) {
             const instrument = this.getInstrument(securityId);
-            const whereClause = instrument 
+            const whereClause = instrument
                 ? { instrument, symbol: 'All', subAccountId, ...applyConditions }
                 : { instrument: 'All', symbol: 'All', subAccountId, ...applyConditions };
 
@@ -84,7 +83,7 @@ class TradingService {
     }
 
     static sortEntriesByTime(entries, timeProperty) {
-        return entries.sort((a, b) => 
+        return entries.sort((a, b) =>
             new Date(a[timeProperty]) - new Date(b[timeProperty])
         );
     }
@@ -98,9 +97,9 @@ class TradingService {
             const entryTradeCommission = await this.calculateCommission(
                 entry.SecurityId, subAccountId, entry.OpenVolume, entry.Commission, true, false
             );
-            const exitTradeCommission = Math.abs(entry.Commission) > 0 ? 0 : 
+            const exitTradeCommission = Math.abs(entry.Commission) > 0 ? 0 :
                 await this.calculateCommission(entry.SecurityId, subAccountId, entry.CloseVolume, entry.Commission, false, true);
-            
+
             const tradeData = {
                 OpenId: entry.OpenId || entry.Id,
                 CloseId: entry.CloseId || entry.Id,
@@ -123,7 +122,7 @@ class TradingService {
             }
 
             const previousData = proximityData[entry.SecurityId].at(-1);
-            if (previousData.Side === tradeData.Side && 
+            if (previousData.Side === tradeData.Side &&
                 new Date(previousData.CloseTime) > new Date(tradeData.OpenTime)
             ) {
                 const groupId = previousData.GroupId || currentGroupId++;
@@ -143,7 +142,7 @@ class TradingService {
 
         if (TradeService.getAssetType(symbol) === AssetType.Forex) {
             trade.ExchangeRate = await ForexService.getExchangeRate(
-                ForexService.getCurrencyPair(symbol), 
+                ForexService.getCurrencyPair(symbol),
                 trade.OpenTime
             );
         }
@@ -204,7 +203,7 @@ class TradingService {
             const avgOpen = contract.OpenPrice / contract.Contracts.length;
             const avgClose = contract.ClosePrice / contract.Contracts.length;
             const assetType = TradeService.getAssetType(contract.Contracts[0].SecurityId);
-            
+
             const mainTrade = await prisma.historyMyTrade.create({
                 data: {
                     subUserId: contract.Contracts[0].subAccountId,
@@ -230,12 +229,8 @@ class TradingService {
         return allContracts;
     }
 
-    static saveCapturedImage(base64Data, fileName) {
-        const parsedImage = base64Data.replace(/^data:image\/\w+;base64,/, '');
-        const imageBuffer = Buffer.from(parsedImage, 'base64');
-        const filePath = path.join('uploads', `${moment().format("DD-MM-YYYY-HH-mm-ss")}-${fileName}`);
-        fs.writeFileSync(filePath, imageBuffer);
-        return `${process.env.IMAGE_URL}/${filePath}`;
+    static async saveCapturedImage(base64Data, fileName) {
+          return await uploadToS3FromBase64(base64Data, fileName);
     }
 
     static async validateSubAccount(accountId, authKey, broker, alternateId) {
@@ -263,7 +258,7 @@ class TradingService {
         const { subAccount, user } = await this.validateSubAccount(accountId, authKey, broker);
         return this.insertSingleTrade(
             subAccount,
-            user.timeZone,
+            user.createdAt,
             securityId,
             type,
             new Date(),
@@ -285,26 +280,31 @@ class TradingService {
         const TIME_FORMAT = "MM/DD/YYYY HH:mm:ss";
 
         if (tradeId) {
-            const existing = await prisma.historyMyTrade.findFirst({
+            const existing = await prisma.historyMyTrade.findMany({
                 where: {
-                    OR: [
-                        { data: { path: ['OpenId'], equals: tradeId } },
-                        { data: { path: ['CloseId'], equals: tradeId } }
-                    ]
+                    subUserId: subAccount.id,
+                    status: { not: 'Closed' },
                 }
             });
-            if (existing) throw new Error("Duplicate Trade");
+
+            const isDuplicate = existing.some(trade =>
+                trade.data?.OpenId === tradeId || trade.data?.CloseId === tradeId
+            );
+            if (isDuplicate) throw new Error("Duplicate Trade");
         }
 
-        const openTrades = await prisma.historyMyTrade.findMany({
+        const allTrades = await prisma.historyMyTrade.findMany({
             where: {
                 subUserId: subAccount.id,
-                data: { path: ['SecurityId'], equals: securityId },
-                status: { not: 'Closed' },
-                data: { path: ['OpenType'], equals: type === 'Buy' ? 'Sell' : 'Buy' }
+                status: { not: 'Closed' }
             },
             orderBy: { openTime: 'asc' }
         });
+
+        const openTrades = allTrades.filter(trade =>
+            trade.data?.SecurityId === securityId &&
+            trade.data?.OpenType === (type === 'Buy' ? 'Sell' : 'Buy')
+        );
 
         if (!settle || openTrades.length === 0) {
             return prisma.historyMyTrade.create({
@@ -336,11 +336,11 @@ class TradingService {
         let volumeToSettle = volume;
         for (const trade of openTrades) {
             if (volumeToSettle <= 0) break;
-            
+
             const remaining = Math.abs(trade.data.OpenVolume + trade.data.CloseVolume);
             const settled = Math.min(remaining, volumeToSettle);
             const newCloseVolume = trade.data.CloseVolume + (trade.data.Side === 'LONG' ? -settled : settled);
-            
+
             await prisma.historyMyTrade.update({
                 where: { id: trade.id },
                 data: {
@@ -395,28 +395,31 @@ class TradingService {
 
     static calculateClosePrice(trade, price, volume) {
         const prevClose = Math.abs(trade.data.CloseVolume);
-        return prevClose > 0 
+        return prevClose > 0
             ? (prevClose * trade.data.ClosePrice + volume * price) / (prevClose + volume)
             : price;
     }
 
     static async applyStopLossOrTakeProfit(subAccount, securityId, type, price) {
-        const openTrades = await prisma.historyMyTrade.findMany({
+        const allTrades = await prisma.historyMyTrade.findMany({
             where: {
                 subUserId: subAccount.id,
-                data: { path: ['SecurityId'], equals: securityId },
                 status: { not: 'Closed' }
             }
         });
 
+        const openTrades = allTrades.filter(trade =>
+            trade.data?.SecurityId === securityId
+        );
+
         for (const trade of openTrades) {
             const update = { data: { ...trade.data } };
-            
+
             if (type === 'auto') {
                 const side = trade.data.Side;
                 const openPrice = trade.data.OpenPrice;
                 let newType;
-                
+
                 if (side === 'LONG') {
                     newType = openPrice > price ? 'StopLoss' : 'ProfitTarget';
                 } else {
@@ -433,6 +436,7 @@ class TradingService {
             });
         }
     }
+
 }
 
 module.exports = TradingService;
