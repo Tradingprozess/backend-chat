@@ -207,7 +207,7 @@ const authenticateAutoSyncPlugin = async (req, res, next) => {
     const referenceAccountIds = req.references.map(
       (reference) => reference.accountId
     );
-    console.log("Trigred referenceAccountIds ",referenceAccountIds)
+    console.log("Trigred referenceAccountIds ", referenceAccountIds)
 
 
     if (referenceAccountIds.length === 0) {
@@ -235,16 +235,16 @@ const verifyAutoSync = async (req, res) => {
   try {
 
     const { code } = req.body;
-    console.log("Trigred Code Api",code)
-    if (!code) return res.status(400).json({ error: "Code required" });
+    console.log("Trigred Code Api", code)
+    if (!code) return res.status(400).json({ error: "Code is required for authentication" });
 
     const otpData = await prisma.otpCode.findFirst({
       where: { code: parseInt(code) },
     });
 
-    if (!otpData) return res.status(400).json({ error: "Invalid code" });
+    if (!otpData) return res.status(400).json({ error: "Invalid Code" });
 
-    console.log("otpData",otpData)
+    console.log("otpData", otpData)
 
     const reference = await prisma.subAccountReference.findFirst({
       where: {
@@ -253,7 +253,7 @@ const verifyAutoSync = async (req, res) => {
     });
 
     if (!reference) {
-      return res.status(400).json({ error: "No reference found" });
+      return res.status(400).json({ error: "No relevant reference found" });
     }
 
     const updatedReference = await prisma.subAccountReference.update({
@@ -261,9 +261,9 @@ const verifyAutoSync = async (req, res) => {
       data: { status: "active" },
     });
 
-    console.log("updatedReference.authKey",updatedReference.authKey)
+    console.log("updatedReference.authKey", updatedReference.authKey)
 
-    res.json({ data: {authKey: updatedReference.authKey} });
+    res.status(200).json({ data: { authKey: updatedReference.authKey } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -347,18 +347,18 @@ const deleteAutoSyncReference = async (req, res) => {
 const addTradeHook = async (req, res, next) => {
   try {
     // {"tradeId": "827709905","accountId": "207224084","type": "BUY","securityId": "BTCUSD","price": 83699.07,"volume": 0.10,"commission": 0.00,"captureEntry": true,"captureExit": false,"image": "entry_827709905.png"}
-    const {tradeId, accountId, type, securityId, price, volume, commission, image, captureEntry, captureExit} = req.body;
+    const { tradeId, accountId, type, securityId, price, volume, commission, image, captureEntry, captureExit } = req.body;
     console.log(tradeId, accountId, type, securityId, price, volume, commission);
     const authKey = req.headers.auth;
     const broker = req.references[0].broker;
 
     await TradingService.insertAutoSyncTrade(broker, authKey, accountId, tradeId, type, securityId, price, volume, commission, image, captureEntry, captureExit);
 
-    return res.status(200).json({message: "Trade added successfully"});
+    return res.status(200).json({ message: "Trade added successfully" });
   }
   catch (error) {
     console.log(error)
-    return res.status(500).json({error: error.message});
+    return res.status(500).json({ error: error.message });
   }
 }
 
@@ -366,24 +366,24 @@ const limitDataHook = async (req, res, next) => {
   try {
     console.log("Trigred limitDataHook Api", req.body)
 
-    const {accountId, type, price, securityId} = req.body;
+    const { accountId, type, price, securityId } = req.body;
     const authKey = req.headers.auth;
 
-    if(!accountId || !type || price === undefined) {
-      return res.status(400).json({error: "Invalid Data"});
+    if (!accountId || !type || price === undefined) {
+      return res.status(400).json({ error: "Invalid Data" });
     }
 
     const broker = req.references[0].broker;
 
-    const {user, subAccount} = await TradingService.validateSubAccount(accountId, authKey, broker);
+    const { user, subAccount } = await TradingService.validateSubAccount(accountId, authKey, broker);
 
     await TradingService.applyStopLossOrTakeProfit(subAccount, securityId, type, price);
 
-    return res.status(200).json({message: "Trade Limit Updated successfully"});
+    return res.status(200).json({ message: "Trade Limit Updated successfully" });
   }
   catch (error) {
     console.log(error)
-    return res.status(500).json({error: error.message});
+    return res.status(500).json({ error: error.message });
   }
 }
 
