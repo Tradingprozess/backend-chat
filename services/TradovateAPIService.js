@@ -239,7 +239,7 @@ class TradovateAPIService {
 
                                             const { user, subAccount } = accountReference;
                                             // Inserting the trade
-                                            await TradingService.insertSingleTrade(subAccount, user.timezone, contractItem.name, action, new Date(), price, volume, 0, 0, 0, true, null, null, false, false, entity.orderId);
+                                            await TradingService.insertSingleTrade(subAccount, null, contractItem.name, action, new Date(), price, volume, 0, 0, 0, true, null, null, false, false, entity.orderId);
                                         }
                                     }
                                 }
