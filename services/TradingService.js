@@ -230,7 +230,7 @@ class TradingService {
     }
 
     static async saveCapturedImage(base64Data, fileName) {
-          return await uploadToS3FromBase64(base64Data, fileName);
+        return await uploadToS3FromBase64(base64Data, fileName);
     }
 
     static async validateSubAccount(accountId, authKey, broker, alternateId) {
@@ -292,7 +292,6 @@ class TradingService {
             );
             if (isDuplicate) throw new Error("Duplicate Trade");
         }
-
         const allTrades = await prisma.historyMyTrade.findMany({
             where: {
                 subUserId: subAccount.id,
@@ -306,7 +305,7 @@ class TradingService {
             trade.data?.OpenType === (type === 'Buy' ? 'Sell' : 'Buy')
         );
 
-        const entryImage = captureEntry ? await this.saveCapturedImage(image, uuidv4()+'_entry.png') : null
+        const entryImage = captureEntry ? await this.saveCapturedImage(image, uuidv4() + '_entry.png') : null
 
         if (!settle || openTrades.length === 0) {
             return prisma.historyMyTrade.create({
@@ -321,79 +320,115 @@ class TradingService {
                         OpenTime: moment(time).format(TIME_FORMAT),
                         CloseTime: '',
                         OpenPrice: price,
+                        StopLoss: stopLoss,
+                        ProfitTarget: profitTarget,
                         ClosePrice: 0,
                         Commission: await this.calculateCommission(securityId, subAccount.id, volume, commission, true, false),
-                        OpenVolume: type === 'Buy' ? volume : -volume,
+                        OpenVolume: type === 'Buy' ? volume : volume * -1,
+                        CloseVolume: 0,
                         SecurityId: securityId,
+                        CloseType: '',
                         OpenType: type,
                         Contracts: []
                     },
                     openTime: time,
+                    closeTime: null,
                     status: 'Open',
                     entryImage: entryImage
                 }
             });
-        }
+        } else {
+            let volumeToSettle = volume;
+            let openTradesToProcess = [...openTrades];
+            while (volumeToSettle > 0 && openTradesToProcess.length > 0) {
+                const trade = openTradesToProcess.shift();
+                const assetType = await TradeService.getAssetType(trade.data.SecurityId);
 
-        let volumeToSettle = volume;
-        for (let trade of openTrades) {
-            if (volumeToSettle <= 0) break;
-
-            const remaining = Math.abs(trade.data.OpenVolume + trade.data.CloseVolume);
-            const settled = Math.min(remaining, volumeToSettle);
-            const newCloseVolume = trade.data.CloseVolume + (trade.data.Side === 'LONG' ? -settled : settled);
-
-            const exitImage = captureExit ? await this.saveCapturedImage(image, uuidv4()+'_exit.png') : null
-            await prisma.historyMyTrade.update({
-                where: { id: trade.id },
-                data: {
-                    data: {
-                        ...trade.data,
-                        CloseId: tradeId || uuidv4(),
-                        CloseTime: moment(time).format(TIME_FORMAT),
-                        ClosePrice: this.calculateClosePrice(trade, price, settled),
-                        CloseVolume: newCloseVolume,
-                        Commission: trade.data.Commission + await this.calculateCommission(securityId, subAccount.id, settled, commission, false, true),
-                        Contracts: [
-                            ...trade.data.Contracts,
-                            {
-                                OpenTime: trade.data.OpenTime,
-                                CloseTime: moment(time).format(TIME_FORMAT),
-                                OpenPrice: trade.data.OpenPrice,
-                                ClosePrice: price,
-                                OpenVolume: trade.data.Side === 'LONG' ? settled : -settled,
-                                CloseVolume: trade.data.Side === 'LONG' ? -settled : settled,
-                                PnL: await this.calculatePNL({
-                                    ...trade.data,
-                                    ClosePrice: price,
-                                    CloseVolume: newCloseVolume
-                                })
-                            }
-                        ]
-                    },
-                    status: settled === remaining ? 'Closed' : 'Partial',
-                    exitImage: exitImage
+                if(targetTrade && trade.id !== targetTrade) {
+                    continue;
                 }
-            });
+                // Determine tradeOpenPrice based on ProfitCalculationMethod
+                let tradeOpenPrice;
+                if (subAccount.ProfitCalculationMethod === 'FIFO') {
+                    tradeOpenPrice = trade.data.OpenPrice;
+                } else {
+                    const currentAndRemaining = [trade, ...openTradesToProcess];
+                    const totalVolume = currentAndRemaining.reduce((acc, t) => acc + Math.abs(t.data.OpenVolume + t.data.CloseVolume), 0);
+                    const sum = currentAndRemaining.reduce((acc, t) => acc + t.data.OpenPrice * Math.abs(t.data.OpenVolume + t.data.CloseVolume), 0);
+                    tradeOpenPrice = totalVolume === 0 ? 0 : sum / totalVolume;
+                }
+                tradeOpenPrice = NumberService.toDecimal(tradeOpenPrice, assetType === AssetType.Forex ? 5 : 2);
 
-            volumeToSettle -= settled;
+                const remainingVolume = Math.abs(trade.data.OpenVolume + trade.data.CloseVolume);
+                const settled = Math.min(remainingVolume, volumeToSettle);
+                const newCloseVolume = trade.data.Side === 'LONG' ? trade.data.CloseVolume - settled : trade.data.CloseVolume + settled;
+
+                // Calculate close price and PnL
+                const closePrice = this.calculateClosePrice(trade, price, settled);
+                const closePriceRounded = NumberService.toDecimal(closePrice, assetType === AssetType.Forex ? 5 : 2);
+
+                let pnl = TradeService.calculatePnL(securityId, tradeOpenPrice, closePriceRounded, trade.data.Side);
+                pnl = await TradeService.getAdjustedPrice(securityId, pnl, moment(time).format(TIME_FORMAT), settled);
+                pnl = NumberService.toDecimal(pnl, 2) - trade.data.Commission;
+
+                // Handle Forex exchange rate
+                if (assetType === AssetType.Forex) {
+                    const currencyPair = ForexService.getCurrencyPair(trade.data.SecurityId);
+                    const exchangeRate = await ForexService.getExchangeRate(currencyPair, moment(time).format(TIME_FORMAT));
+                    trade.data.ExchangeRate = exchangeRate;
+                }
+
+                // Prepare contract and update trade
+                const newContract = {
+                    PnL: pnl,
+                    OpenTime: trade.data.OpenTime,
+                    CloseTime: moment(time).format(TIME_FORMAT),
+                    OpenPrice: trade.data.OpenPrice,
+                    ClosePrice: closePriceRounded,
+                    OpenVolume: trade.data.Side === 'LONG' ? settled : -settled,
+                    CloseVolume: trade.data.Side === 'LONG' ? -settled : settled,
+                    ...(assetType === AssetType.Forex && { ExchangeRate: trade.data.ExchangeRate })
+                };
+
+                const exitImage = captureExit ? await this.saveCapturedImage(image, uuidv4() + '_exit.png') : null;
+                await prisma.historyMyTrade.update({
+                    where: { id: trade.id },
+                    data: {
+                        data: {
+                            ...trade.data,
+                            CloseId: tradeId || uuidv4(),
+                            CloseTime: moment(time).format(TIME_FORMAT),
+                            ClosePrice: closePriceRounded,
+                            CloseVolume: newCloseVolume,
+                            Commission: trade.data.Commission + await this.calculateCommission(securityId, subAccount.id, settled, commission, false, true),
+                            Contracts: [...trade.data.Contracts, newContract],
+                            PnL: trade.data.PnL + pnl,
+                            ...(assetType === AssetType.Forex && { ExchangeRate: trade.data.ExchangeRate })
+                        },
+                        status: settled === remainingVolume ? 'Closed' : 'Partial',
+                        exitImage: exitImage
+                    }
+                });
+
+                volumeToSettle -= settled;
+            }
+            if (volumeToSettle > 0) {
+                return this.insertSingleTrade(
+                    subAccount,
+                    timeZone,
+                    securityId,
+                    type,
+                    time,
+                    price,
+                    volumeToSettle,
+                    commission,
+                    stopLoss,
+                    profitTarget,
+                    false
+                );
+            }
         }
 
-        if (volumeToSettle > 0) {
-            return this.insertSingleTrade(
-                subAccount,
-                timeZone,
-                securityId,
-                type,
-                time,
-                price,
-                volumeToSettle,
-                commission,
-                stopLoss,
-                profitTarget,
-                false
-            );
-        }
     }
 
     static calculateClosePrice(trade, price, volume) {
