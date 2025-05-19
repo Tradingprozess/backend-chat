@@ -253,9 +253,9 @@ const verifyAutoSync = async (req, res) => {
     const reference = await prisma.subAccountReference.findFirst({
       where: {
         subAccountId: otpData.userId,
+        broker: "Atas"
       },
     });
-    console.log("reference:", reference)
 
     if (!reference) {
       return res.status(400).json({ error: "No relevant reference found" });
