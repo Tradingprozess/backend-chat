@@ -144,6 +144,7 @@ class TradovateAPIService {
 
         client.on('connect', function (connection) {
             Logger.important('Tradovate API', `Socket Connection Successful for user ${userId}`)
+            console.log('Tradovate API', `Socket Connection Successful for user ${userId}`)
             TradovateAPIService.SOCKET_CONNECTIONS[userId] = connection;
 
             connection.on('error', function (error) {
@@ -279,10 +280,13 @@ class TradovateAPIService {
     }
 
     static async InitializeForUser(access_token, account_id, account_name, userId) {
+        console.log("InitializeForUser", access_token)
         if (access_token) {
             const accounts = await this.GetAccountsList(access_token);
+            console.log("accounts", accounts)
             if (accounts.length > 0) {
                 const acc = accounts.filter(acc => acc.id === account_id && acc.userId === userId && (acc.name === account_name || acc.nickname === account_name))[0];
+                console.log("acc", acc)
                 if (acc) {
                     if (!this.CONNECTION_DATA[acc.userId]) {
                         this.CONNECTION_DATA[acc.userId] = {}
