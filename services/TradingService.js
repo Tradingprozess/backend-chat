@@ -394,6 +394,7 @@ class TradingService {
                 await prisma.historyMyTrade.update({
                     where: { id: trade.id },
                     data: {
+                        closeTime: settled === remainingVolume && new Date(time)?.toISOString() ,
                         data: {
                             ...trade.data,
                             CloseId: tradeId || uuidv4(),
