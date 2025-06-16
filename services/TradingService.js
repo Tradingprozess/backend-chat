@@ -344,7 +344,7 @@ class TradingService {
                 const trade = openTradesToProcess.shift();
                 const assetType = await TradeService.getAssetType(trade.data.SecurityId);
 
-                if(targetTrade && trade.id !== targetTrade) {
+                if (targetTrade && trade.id !== targetTrade) {
                     continue;
                 }
                 // Determine tradeOpenPrice based on ProfitCalculationMethod
@@ -360,11 +360,27 @@ class TradingService {
                 tradeOpenPrice = NumberService.toDecimal(tradeOpenPrice, assetType === AssetType.Forex ? 5 : 2);
 
                 const remainingVolume = Math.abs(trade.data.OpenVolume + trade.data.CloseVolume);
+
+                let sharesSettled = 0;
+                let tradeStatus;
+                if (remainingVolume > volumeToSettle) {
+                    sharesSettled = volumeToSettle;
+                    tradeStatus = 'Partial';
+                }
+                else if (remainingVolume === volumeToSettle) {
+                    sharesSettled = volumeToSettle;
+                    tradeStatus = 'Closed';
+                }
+                else {
+                    sharesSettled = remainingVolume;
+                    tradeStatus = 'Closed';
+                }
+
                 const settled = Math.min(remainingVolume, volumeToSettle);
                 const newCloseVolume = trade.data.Side === 'LONG' ? trade.data.CloseVolume - settled : trade.data.CloseVolume + settled;
 
                 // Calculate close price and PnL
-                const closePrice = this.calculateClosePrice(trade, price, settled);
+                const closePrice = this.calculateClosePrice(trade, price, sharesSettled);
                 const closePriceRounded = NumberService.toDecimal(closePrice, assetType === AssetType.Forex ? 5 : 2);
 
                 let pnl = TradeService.calculatePnL(securityId, tradeOpenPrice, closePriceRounded, trade.data.Side);
@@ -378,6 +394,7 @@ class TradingService {
                     trade.data.ExchangeRate = exchangeRate;
                 }
 
+
                 // Prepare contract and update trade
                 const newContract = {
                     PnL: pnl,
@@ -385,8 +402,8 @@ class TradingService {
                     CloseTime: moment(time).format(TIME_FORMAT),
                     OpenPrice: trade.data.OpenPrice,
                     ClosePrice: closePriceRounded,
-                    OpenVolume: trade.data.Side === 'LONG' ? settled : -settled,
-                    CloseVolume: trade.data.Side === 'LONG' ? -settled : settled,
+                    OpenVolume: trade.data.Side === 'LONG' ? sharesSettled : -1 * sharesSettled,
+                    CloseVolume: trade.data.Side === 'LONG' ? -1 * sharesSettled : sharesSettled,
                     ...(assetType === AssetType.Forex && { ExchangeRate: trade.data.ExchangeRate })
                 };
 
@@ -394,24 +411,24 @@ class TradingService {
                 await prisma.historyMyTrade.update({
                     where: { id: trade.id },
                     data: {
-                        closeTime: settled === remainingVolume && new Date(time)?.toISOString() ,
+                        closeTime: settled === remainingVolume && new Date(time)?.toISOString(),
                         data: {
                             ...trade.data,
                             CloseId: tradeId || uuidv4(),
                             CloseTime: moment(time).format(TIME_FORMAT),
                             ClosePrice: closePriceRounded,
                             CloseVolume: newCloseVolume,
-                            Commission: trade.data.Commission + await this.calculateCommission(securityId, subAccount.id, settled, commission, false, true),
+                            Commission: trade.data.Commission + await this.calculateCommission(securityId, subAccount.id, sharesSettled, commission, false, true),
                             Contracts: [...trade.data.Contracts, newContract],
                             PnL: trade.data.PnL + pnl,
                             ...(assetType === AssetType.Forex && { ExchangeRate: trade.data.ExchangeRate })
                         },
-                        status: settled === remainingVolume ? 'Closed' : 'Partial',
+                        status: tradeStatus,
                         exitImage: exitImage
                     }
                 });
 
-                volumeToSettle -= settled;
+                volumeToSettle -= sharesSettled;
             }
             if (volumeToSettle > 0) {
                 return this.insertSingleTrade(
